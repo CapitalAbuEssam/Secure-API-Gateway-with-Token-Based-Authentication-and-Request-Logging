@@ -80,7 +80,7 @@ Decrypts the data provided by the user.
 ### **2. AES Encryption**
 - **Why**: Secure data transmission.
 - **How It Works**:
-  - Encrypts data using AES with a key and IV.
+  - Encrypts data using AES with a key and IV (An initialization vector (IV) is an arbitrary number that can be used with a secret key for data encryption to foil cyber attacks).
   - Encodes encrypted data in Base64 for safe transmission.
 
 ### **3. Rate Limiting**
