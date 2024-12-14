@@ -1,0 +1,4 @@
+pip install flask pyjwt cryptography python-dotenv
+pip install flask-socketio eventlet flask-cors
+pip install matplotlib
+pip install collections

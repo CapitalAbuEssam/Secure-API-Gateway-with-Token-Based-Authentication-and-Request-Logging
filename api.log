@@ -1,0 +1,37 @@
+2024-12-14 10:47:23,645 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2024-12-14 10:47:23,646 - INFO - [33mPress CTRL+C to quit[0m
+2024-12-14 10:47:23,646 - INFO -  * Restarting with stat
+2024-12-14 10:47:23,817 - WARNING -  * Debugger is active!
+2024-12-14 10:47:23,829 - INFO -  * Debugger PIN: 792-688-478
+2024-12-14 10:47:34,940 - INFO - 127.0.0.1 - - [14/Dec/2024 10:47:34] "GET / HTTP/1.1" 200 -
+2024-12-14 10:47:43,561 - INFO - User 'tes******' logged in and received a token.
+2024-12-14 10:47:43,561 - INFO - 127.0.0.1 - - [14/Dec/2024 10:47:43] "POST /login HTTP/1.1" 200 -
+2024-12-14 10:48:27,322 - INFO - 127.0.0.1 - - [14/Dec/2024 10:48:27] "[35m[1mGET /secure-data HTTP/1.1[0m" 500 -
+2024-12-14 10:48:47,333 - INFO - User 'tes******' accessed secure data.
+2024-12-14 10:48:47,334 - INFO - 127.0.0.1 - - [14/Dec/2024 10:48:47] "GET /secure-data HTTP/1.1" 200 -
+2024-12-14 10:48:53,386 - INFO - User 'tes******' accessed secure data.
+2024-12-14 10:48:53,386 - INFO - 127.0.0.1 - - [14/Dec/2024 10:48:53] "GET /secure-data HTTP/1.1" 200 -
+2024-12-14 10:48:55,160 - INFO - User 'tes******' accessed secure data.
+2024-12-14 10:48:55,160 - INFO - 127.0.0.1 - - [14/Dec/2024 10:48:55] "GET /secure-data HTTP/1.1" 200 -
+2024-12-14 10:48:56,048 - INFO - User 'tes******' accessed secure data.
+2024-12-14 10:48:56,049 - INFO - 127.0.0.1 - - [14/Dec/2024 10:48:56] "GET /secure-data HTTP/1.1" 200 -
+2024-12-14 10:48:56,784 - INFO - User 'tes******' accessed secure data.
+2024-12-14 10:48:56,784 - INFO - 127.0.0.1 - - [14/Dec/2024 10:48:56] "GET /secure-data HTTP/1.1" 200 -
+2024-12-14 10:48:57,528 - INFO - 127.0.0.1 - - [14/Dec/2024 10:48:57] "[31m[1mGET /secure-data HTTP/1.1[0m" 429 -
+2024-12-14 10:57:02,291 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000 - Origin Origin
+2024-12-14 10:57:02,291 - INFO - [33mPress CTRL+C to quit[0m - Origin Origin
+2024-12-14 10:57:02,292 - INFO -  * Restarting with stat - Origin Origin
+2024-12-14 10:57:02,463 - WARNING -  * Debugger is active! - Origin Origin
+2024-12-14 10:57:02,474 - INFO -  * Debugger PIN: 792-688-478 - Origin Origin
+2024-12-14 10:57:10,110 - INFO - 127.0.0.1 - - [14/Dec/2024 10:57:10] "GET / HTTP/1.1" 200 - - Origin Origin
+2024-12-14 10:57:31,800 - INFO -  * Detected change in '/Users/muhammad/Desktop/Secure Software Project/app.py', reloading - Origin Origin
+2024-12-14 10:57:31,839 - INFO -  * Restarting with stat - Origin Origin
+2024-12-14 10:58:08,587 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000 - Origin Muhammad Essam
+2024-12-14 10:58:08,588 - INFO - [33mPress CTRL+C to quit[0m - Origin Muhammad Essam
+2024-12-14 10:58:08,588 - INFO -  * Restarting with stat - Origin Muhammad Essam
+2024-12-14 10:58:08,763 - WARNING -  * Debugger is active! - Origin Muhammad Essam
+2024-12-14 10:58:08,777 - INFO -  * Debugger PIN: 792-688-478 - Origin Muhammad Essam
+2024-12-14 10:58:11,489 - INFO - 127.0.0.1 - - [14/Dec/2024 10:58:11] "GET / HTTP/1.1" 200 - - Origin Muhammad Essam

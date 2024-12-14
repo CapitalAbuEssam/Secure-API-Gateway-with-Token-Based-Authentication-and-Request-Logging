@@ -1,0 +1,4 @@
+curl http://127.0.0.1:5000/
+curl -X POST http://127.0.0.1:5000/login -H "Content-Type: application/json" -d '{"username": "test_user"}'
+curl -X GET http://127.0.0.1:5000/secure-data -H "Authorization: Bearer <JWT_TOKEN_HERE>" 
+curl -X POST http://127.0.0.1:5000/decrypt -H "Authorization: Bearer <JWT_TOKEN_HERE>" -H "Content-Type: application/json" -d '{"data": "SOME_ENCRYPTED_STRING_HERE"}'
