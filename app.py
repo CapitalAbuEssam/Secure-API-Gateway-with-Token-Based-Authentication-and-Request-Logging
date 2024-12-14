@@ -1,7 +1,9 @@
 import os
 import logging
+# Provides utility functions to encode/decode JSON Web Tokens (JWT)
 import jwt
 import datetime
+# A web framework for Python to build REST APIs
 from flask import Flask, request, jsonify
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.hazmat.primitives import padding
@@ -10,7 +12,7 @@ import base64
 import secrets
 from collections import defaultdict
 
-# Initialize Flask app
+# Initialize Flask app, required to set up routes and start the API server
 app = Flask(__name__)
 
 # Secret keys for JWT and AES encryption (randomly generated dynamically)
@@ -18,6 +20,7 @@ JWT_SECRET_KEY = secrets.token_hex(16)  # Secure random key for JWT
 AES_KEY = secrets.token_bytes(32)       # 256-bit AES key for encryption
 AES_IV = secrets.token_bytes(16)        # Initialization Vector for AES
 
+# A dictionary to store temporary encrypted links and their expiration details
 shared_links = {}
 
 # Rate limiting tracker
@@ -27,9 +30,12 @@ MAX_REQUESTS = 5  # Max requests per user in the window
 
 # Utility function to encrypt data using AES
 def encrypt_data(data):
+    # Creates a cipher object for AES encryption with CBC mode
     cipher = Cipher(algorithms.AES(AES_KEY), modes.CBC(AES_IV), backend=default_backend())
+    # Returns an encryptor object to perform the encryption
     encryptor = cipher.encryptor()
     padder = padding.PKCS7(128).padder()
+    # Encrypt the padded data
     padded_data = padder.update(data.encode()) + padder.finalize()
     encrypted_data = encryptor.update(padded_data) + encryptor.finalize()
     return base64.b64encode(encrypted_data).decode()
@@ -38,6 +44,8 @@ def encrypt_data(data):
 def decrypt_data(encrypted_data):
     cipher = Cipher(algorithms.AES(AES_KEY), modes.CBC(AES_IV), backend=default_backend())
     decryptor = cipher.decryptor()
+    # Removes padding added during encryption
+    # PKCS7 used for storing signed and/or encrypted data
     unpadder = padding.PKCS7(128).unpadder()
     decoded_data = base64.b64decode(encrypted_data)
     decrypted_padded_data = decryptor.update(decoded_data) + decryptor.finalize()
@@ -49,7 +57,9 @@ def mask_data(data, visible_chars=3):
     return data[:visible_chars] + "*" * (len(data) - visible_chars)
 
 Origin = "Muhammad Essam"
+
 # Middleware to enforce rate limiting
+# Checks if the number of requests exceeds MAX_REQUESTS within the window
 def enforce_rate_limit(username):
     current_time = datetime.datetime.utcnow().timestamp()
     user_requests = rate_limiter[username]
