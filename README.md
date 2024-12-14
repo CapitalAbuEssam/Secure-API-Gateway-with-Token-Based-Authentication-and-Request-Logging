@@ -1,208 +1,228 @@
-# Secure Flask API
+# Secure API Gateway
 
-This project implements a secure API using Flask, incorporating advanced security features such as JSON Web Tokens (JWT), AES encryption, rate limiting, and robust logging.
-
----
-
-## **Features**
-
-1. **JWT Authentication**: Users are authenticated with JSON Web Tokens for secure and stateless session management.
-2. **AES Encryption**: Sensitive data is encrypted and transmitted securely using AES (Advanced Encryption Standard).
-3. **Rate Limiting**: Prevents abuse by limiting the number of requests a user can make within a specified time window.
-4. **Detailed Logging**: Logs all events with timestamps and masked sensitive data for security and debugging.
+This project implements a **secure API gateway** using Flask. It includes robust features such as JWT authentication, AES encryption, rate limiting, and temporary data sharing. Below is an in-depth explanation of the functionality, structure, and usage of this application.
 
 ---
 
-## **Endpoints**
+## Features
+1. **JWT Authentication**:
+   - Users log in with their username to receive a secure JWT token for authentication.
+   - The token is valid for 30 minutes.
+2. **AES Encryption**:
+   - Confidential data is encrypted and decrypted using AES (Advanced Encryption Standard) with a 256-bit key.
+3. **Rate Limiting**:
+   - Users are limited to 5 requests per minute to prevent abuse.
+4. **Temporary Links**:
+   - Secure, time-limited links allow users to share encrypted data temporarily.
+5. **Logging**:
+   - All significant actions are logged for debugging and monitoring purposes.
 
-### **1. `/` (GET)**
-Returns a welcome message with a list of available API endpoints.
+---
 
-### **2. `/login` (POST)**
-Generates a JWT token for the user.
+## File Structure
 
-- **Input**: JSON payload with the username:
+```
+project/
+|-- app.py           # Main application file
+|-- api.log          # Logs all requests and actions (created dynamically)
+```
+
+---
+
+## How It Works
+
+### 1. **JWT Authentication**
+- **Route**: `/login`
+- **Method**: POST
+- **Description**:
+  - Users send a `username` to this route.
+  - A JWT token is generated, signed with a secret key, and sent back.
+- **Token Example**:
   ```json
   {
-    "username": "your_username"
+      "token": "<JWT_TOKEN>"
+  }
+  ```
+- **Security**:
+  - The token expires in 30 minutes to reduce vulnerability.
+
+---
+
+### 2. **AES Encryption & Decryption**
+#### **Encrypt Data**
+- The app uses a randomly generated 256-bit AES key and a 128-bit initialization vector (IV).
+- Data is padded with PKCS7 to match AES block size requirements.
+- Encrypted data is Base64-encoded to make it JSON-compatible.
+
+#### **Decrypt Data**
+- The app reverses the encryption process by:
+  1. Decoding Base64 data.
+  2. Decrypting using AES and the same key and IV.
+  3. Removing padding.
+
+---
+
+### 3. **Rate Limiting**
+- Each user is allowed a maximum of **5 requests per minute**.
+- Requests exceeding this limit return a `429 Too Many Requests` response.
+
+---
+
+### 4. **Temporary Links**
+#### **Create Temporary Link**
+- **Route**: `/create-temp-link`
+- **Method**: POST
+- **Description**:
+  - Users provide data to encrypt.
+  - The app creates a unique link with a 10-minute expiration time.
+- **Response Example**:
+  ```json
+  {
+      "temporary_link": "http://localhost:5000/access-temp-link/<LINK_ID>",
+      "expires_at": "<TIMESTAMP>"
   }
   ```
 
-- **Output**: JWT token:
-  ```json
-  {
-    "token": "<your_jwt_token>"
-  }
-  ```
-
-### **3. `/secure-data` (GET)**
-Returns encrypted confidential data for authenticated users.
-
-- **Input**: Include the JWT token in the Authorization header:
-  ```
-  Authorization: Bearer <your_jwt_token>
-  ```
-
-- **Output**: Encrypted data:
-  ```json
-  {
-    "encrypted_data": "<base64_encoded_encrypted_data>"
-  }
-  ```
-
-### **4. `/decrypt` (POST)**
-Decrypts the data provided by the user.
-
-- **Input**: JSON payload with encrypted data and Authorization header:
-  ```json
-  {
-    "encrypted_data": "<base64_encoded_encrypted_data>"
-  }
-  ```
-
-- **Output**: Original decrypted data:
-  ```json
-  {
-    "decrypted_data": "<original_data>"
-  }
-  ```
+#### **Access Temporary Link**
+- **Route**: `/access-temp-link/<link_id>`
+- **Method**: GET
+- **Description**:
+  - Decrypts and retrieves data from the link if it has not expired.
+  - Expired links are cleaned up automatically.
 
 ---
 
-## **Core Functionalities**
-
-### **1. JWT Authentication**
-- **Why**: Secure, stateless user authentication.
-- **How It Works**:
-  - Generates a token for the user with an expiration time.
-  - Validates the token on each request.
-
-### **2. AES Encryption**
-- **Why**: Secure data transmission.
-- **How It Works**:
-  - Encrypts data using AES with a key and IV.
-  - Encodes encrypted data in Base64 for safe transmission.
-
-### **3. Rate Limiting**
-- **Why**: Prevent abuse by restricting requests.
-- **How It Works**:
-  - Tracks each user’s request timestamps.
-  - Allows a maximum of 5 requests in a 60-second window.
-
-### **4. Logging**
-- **Why**: Monitor activity and debug issues.
-- **How It Works**:
-  - Logs every request with a timestamp and origin.
-  - Masks sensitive data in logs to ensure security.
+### 5. **Logging**
+- All actions (logins, access attempts, errors) are logged in `api.log` for monitoring.
+- Logs include timestamps, severity levels, and masked usernames.
 
 ---
 
-## **Configuration**
+## Available Endpoints
 
-### **Environment Variables**
-- `JWT_SECRET_KEY`: Secret key for signing JWT tokens.
-- `AES_KEY`: Secure random key for AES encryption.
-- `AES_IV`: Initialization vector for AES encryption.
-- `RATE_LIMIT_WINDOW`: Time window for rate limiting (in seconds).
-- `MAX_REQUESTS`: Maximum requests allowed in the rate limit window.
-
----
-
-## **Code Structure**
-
-### **Global Configurations**
-- **`JWT_SECRET_KEY`**: Used to sign and verify JWT tokens.
-- **`AES_KEY` & `AES_IV`**: Used for encrypting and decrypting data.
-- **`rate_limiter`**: Tracks user requests to enforce rate limits.
-
-### **Functions**
-
-#### **`encrypt_data(data)`**
-- Encrypts input data using AES encryption.
-- Pads data to match the AES block size (128 bits).
-- Encodes encrypted data in Base64.
-
-#### **`decrypt_data(encrypted_data)`**
-- Decrypts Base64-encoded AES-encrypted data.
-- Removes padding to return the original data.
-
-#### **`mask_data(data, visible_chars=3)`**
-- Masks sensitive data in logs.
-- Example: `"my_password"` becomes `"my_********"`.
-
-#### **`enforce_rate_limit(username)`**
-- Tracks user request timestamps and enforces limits.
-- Blocks requests exceeding `MAX_REQUESTS` in `RATE_LIMIT_WINDOW` seconds.
-
-#### **`verify_token(request)`**
-- Validates the JWT token in the request header.
-- Verifies expiration and token authenticity.
+| Endpoint                  | Method | Description                                                |
+|---------------------------|--------|------------------------------------------------------------|
+| `/`                       | GET    | Welcome message and available routes.                     |
+| `/login`                  | POST   | User login to receive JWT token.                          |
+| `/secure-data`            | GET    | Access encrypted secure data (requires JWT token).        |
+| `/decrypt`                | POST   | Decrypt data (requires JWT token).                        |
+| `/create-temp-link`       | POST   | Generate a temporary sharing link for encrypted data.     |
+| `/access-temp-link/<id>`  | GET    | Access data from a temporary link (if not expired).       |
 
 ---
 
-## **Setup and Running the Application**
+## Setup & Run
 
-### **Requirements**
-- Python 3.7+
-- Flask
-- Cryptography
-- PyJWT
+### Prerequisites
+- Python 3.9+
+- Install required packages:
+  ```bash
+  pip install flask pyjwt cryptography
+  ```
 
-### **Installation**
-1. Clone the repository.
-2. Install dependencies:
-   ```bash
-   pip install flask cryptography pyjwt
-   ```
-3. Run the application:
-   ```bash
-   python app.py
-   ```
-
-### **Accessing the API**
-- API runs on `http://127.0.0.1:5000/` by default.
+### Run the Application
+- Start the Flask server:
+  ```bash
+  python app.py
+  ```
+- Access the API at `http://localhost:5000`.
 
 ---
 
-## **Examples**
+## Detailed Code Explanation
 
-### **1. Login and Get Token**
+### **Key Components**
+#### **1. Flask App Initialization**
+- The Flask app is initialized with `Flask(__name__)`.
+- Secret keys for JWT and AES are dynamically generated using `secrets`.
+
+#### **2. Authentication Middleware**
+- The `verify_token` function validates JWT tokens in incoming requests.
+- Tokens are expected in the `Authorization` header as `Bearer <token>`.
+
+#### **3. Encryption/Decryption Utilities**
+- Encryption and decryption functions handle AES-based security with:
+  - CBC (Cipher Block Chaining) mode.
+  - PKCS7 padding for block size alignment.
+  - Base64 encoding for JSON serialization.
+
+#### **4. Rate Limiting Middleware**
+- The `enforce_rate_limit` function tracks request timestamps per user using a `defaultdict`.
+
+#### **5. Temporary Links**
+- Shared links are stored in a `shared_links` dictionary.
+- Each link has an expiration time (10 minutes).
+
+---
+
+## Example Usage
+
+### 1. **Log In**
 Request:
 ```bash
-curl -X POST http://127.0.0.1:5000/login -H "Content-Type: application/json" -d '{"username": "test_user"}'
+curl -X POST http://localhost:5000/login -H "Content-Type: application/json" -d '{"username": "test_user"}'
 ```
 Response:
 ```json
 {
-  "token": "<jwt_token>"
+    "token": "<JWT_TOKEN>"
 }
 ```
 
-### **2. Get Secure Data**
+### 2. **Access Secure Data**
 Request:
 ```bash
-curl -X GET http://127.0.0.1:5000/secure-data -H "Authorization: Bearer <jwt_token>"
+curl -X GET http://localhost:5000/secure-data -H "Authorization: Bearer <JWT_TOKEN>"
 ```
 Response:
 ```json
 {
-  "encrypted_data": "<base64_encoded_encrypted_data>"
+    "encrypted_data": "<BASE64_ENCRYPTED_INFO>"
 }
 ```
 
-### **3. Decrypt Data**
+### 3. **Decrypt Data**
 Request:
 ```bash
-curl -X POST http://127.0.0.1:5000/decrypt -H "Authorization: Bearer <jwt_token>" -H "Content-Type: application/json" -d '{"encrypted_data": "<base64_encoded_encrypted_data>"}'
+curl -X POST http://localhost:5000/decrypt -H "Authorization: Bearer <JWT_TOKEN>" -H "Content-Type: application/json" -d '{"data": "<BASE64_ENCRYPTED_INFO>"}'
 ```
 Response:
 ```json
 {
-  "decrypted_data": "<original_data>"
+    "decrypted_data": "This is highly confidential information."
+}
+```
+
+### 4. **Create Temporary Link**
+Request:
+```bash
+curl -X POST http://localhost:5000/create-temp-link -H "Authorization: Bearer <JWT_TOKEN>" -H "Content-Type: application/json" -d '{"data": "Sensitive Information"}'
+```
+Response:
+```json
+{
+    "temporary_link": "http://localhost:5000/access-temp-link/<LINK_ID>",
+    "expires_at": "<TIMESTAMP>"
 }
 ```
 
 ---
 
-## **License**
-This project is fully written by Muhammad Essam, feel free to use only if you give attribution
+## Security Measures
+1. **Dynamic Keys**:
+   - AES keys and IVs are dynamically generated at runtime to ensure unpredictability.
+2. **JWT Expiration**:
+   - Tokens expire after 30 minutes to mitigate unauthorized access risks.
+3. **Rate Limiting**:
+   - Prevents abuse by enforcing limits on API usage.
+4. **Masked Logging**:
+   - Usernames are partially masked in logs to protect sensitive information.
+
+---
+
+## License
+This project is open-source and available under the MIT License.
+
+---
+
+Happy Coding! 🎉
