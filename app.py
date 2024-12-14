@@ -18,6 +18,8 @@ JWT_SECRET_KEY = secrets.token_hex(16)  # Secure random key for JWT
 AES_KEY = secrets.token_bytes(32)       # 256-bit AES key for encryption
 AES_IV = secrets.token_bytes(16)        # Initialization Vector for AES
 
+shared_links = {}
+
 # Rate limiting tracker
 rate_limiter = defaultdict(list)
 RATE_LIMIT_WINDOW = 60  # Time window in seconds
@@ -155,6 +157,64 @@ def decrypt():
         logging.error(f"Decryption error: {e}")
         return jsonify({'error': 'Failed to decrypt data.'}), 400
 
+@app.route('/create-temp-link', methods=['POST'])
+def create_temp_link():
+    """Generates a secure temporary sharing link."""
+    decoded_token, error_response = verify_token(request)
+    if error_response:
+        return error_response
+
+    username = decoded_token["username"]
+    rate_limit_error = enforce_rate_limit(username)
+    if rate_limit_error:
+        return rate_limit_error
+
+    # Extract data to be shared
+    data = request.get_json().get('data', None)
+    if not data:
+        return jsonify({'error': 'Data is required to create a temporary link.'}), 400
+
+    # Encrypt data and generate a unique link ID
+    encrypted_data = encrypt_data(data)
+    link_id = secrets.token_hex(8)
+    expiration_time = datetime.datetime.utcnow() + datetime.timedelta(minutes=10)
+
+    # Store the link details
+    shared_links[link_id] = {
+        'data': encrypted_data,
+        'expires_at': expiration_time
+    }
+
+    # Generate the link (assuming the server runs on localhost:5000)
+    link = f"http://localhost:5000/access-temp-link/{link_id}"
+    logging.info(f"Temporary link created by user '{mask_data(username)}'.")
+    return jsonify({'temporary_link': link, 'expires_at': expiration_time.isoformat()}), 201
+
+
+@app.route('/access-temp-link/<link_id>', methods=['GET'])
+def access_temp_link(link_id):
+    """Accesses data from a temporary sharing link."""
+    link_details = shared_links.get(link_id, None)
+
+    # Check if the link exists and has not expired
+    if not link_details:
+        return jsonify({'error': 'Invalid or expired link.'}), 404
+
+    current_time = datetime.datetime.utcnow()
+    if current_time > link_details['expires_at']:
+        # Clean up expired link
+        del shared_links[link_id]
+        return jsonify({'error': 'This link has expired.'}), 410
+
+    # Decrypt the data for viewing
+    encrypted_data = link_details['data']
+    try:
+        decrypted_data = decrypt_data(encrypted_data)
+        return jsonify({'shared_data': decrypted_data}), 200
+    except Exception as e:
+        logging.error(f"Decryption error: {e}")
+        return jsonify({'error': 'Failed to access shared data.'}), 400
+        
 # Run the app
 if __name__ == '__main__':
     app.run(debug=True)
