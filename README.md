@@ -202,7 +202,29 @@ Response:
 }
 ```
 
+### 4. **Create Temporary Link**
+Request:
+```bash
+curl -X POST http://localhost:5000/create-temp-link -H "Authorization: Bearer <JWT_TOKEN>" -H "Content-Type: application/json" -d '{"data": "Sensitive Information"}'
+```
+Response:
+```json
+{
+    "temporary_link": "http://localhost:5000/access-temp-link/<LINK_ID>",
+    "expires_at": "<TIMESTAMP>"
+}
+```
+---
+| Endpoint                  | Method | Description                                                |
+|---------------------------|--------|------------------------------------------------------------|
+| `/`                       | GET    | Welcome message and available routes.                     |
+| `/login`                  | POST   | User login to receive JWT token.                          |
+| `/secure-data`            | GET    | Access encrypted secure data (requires JWT token).        |
+| `/decrypt`                | POST   | Decrypt data (requires JWT token).                        |
+| `/create-temp-link`       | POST   | Generate a temporary sharing link for encrypted data.     |
+| `/access-temp-link/<id>`  | GET    | Access data from a temporary link (if not expired).       |
+
 ---
 
 ## **License**
-This project is licensed under the MIT License. Feel free to use and modify it as needed.
+This project is fully written by Muhammad Essam. Feel free to use it only if attribution was given.
