@@ -221,8 +221,6 @@ Response:
 | `/login`                  | POST   | User login to receive JWT token.                          |
 | `/secure-data`            | GET    | Access encrypted secure data (requires JWT token).        |
 | `/decrypt`                | POST   | Decrypt data (requires JWT token).                        |
-| `/create-temp-link`       | POST   | Generate a temporary sharing link for encrypted data.     |
-| `/access-temp-link/<id>`  | GET    | Access data from a temporary link (if not expired).       |
 
 ---
 
